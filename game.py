@@ -10,6 +10,7 @@ nextFrame = clock()
 frame = 0
 orientation = 0
 
+
 while True:
     if clock() >nextFrame:
         frame= (frame + 1)%2
@@ -18,7 +19,7 @@ while True:
         
         if keyPressed("down"):
             changeSpriteImage(link, 0*2 + frame)
-            orientation =0
+            orientation =0    
         if keyPressed("up"):
             changeSpriteImage(link, 1*2 + frame)
             orientation =1

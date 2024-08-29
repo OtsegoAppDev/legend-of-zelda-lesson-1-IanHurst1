@@ -1,12 +1,15 @@
-from pygame_functions import *
+from pygame_functions2 import *
 
 screenSize(1024,768)
 setAutoUpdate(False)
-link = makeSprite("LinkSimple.png", 14)
+link = makeSprite("LinkSimple2.png", 14)
+octorok = makeSprite("Octorok.png", 4, 2) 
 showSprite(link)
+showSprite(octorok)
 Link_X = 500
 Link_Y = 350
 moveSprite(link, Link_X, Link_Y)
+moveSprite(octorok, 200, 200)
 nextFrame = clock()
 frame = 0
 orientation = 0

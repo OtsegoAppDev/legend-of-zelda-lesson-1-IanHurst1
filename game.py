@@ -7,11 +7,27 @@ gRight = False
 def moveGororia():
     global randFrame, randDirection, frameCount, gUp, gDown, gLeft, gRight
     frameNum = 1
-    spriteSpeed = 6
+    spriteSpeed = 4
 
-    randNumbers()
-    if frameCount == randFrame:
+    
         
+    if frameCount == randFrame:
+        randNumbers()
+#        if gUp == True:
+#            if randDirection == 0:
+#                randNumbers()
+#        elif gDown == True:
+#            if randDirection == 1:
+#                randNumbers()
+#        elif gLeft == True:
+#            if randDirection == 2:
+#                randNumbers()
+#        elif gRight == True:
+#            if randDirection == 3:
+#                randNumbers()
+#        else:
+#            if randDirection == 4:
+#                randNumbers()
         if randDirection == 0:
             gUp = True
             gDown = False
@@ -27,11 +43,16 @@ def moveGororia():
             gDown = False
             gLeft = True
             gRight = False
-        else:
+        elif randDirection == 3:
             gUp = False
             gDown = False
             gLeft = False
             gRight = True
+        else:
+            gUp = False
+            gDown = False
+            gLeft = False
+            gRight = False
     if gororia.rect.x <= 10:
         gUp = False
         gDown = False
@@ -82,8 +103,16 @@ randDirection = 0
 frameCount = 0
 def randNumbers():
     global randFrame, randDirection
-    randFrame = random.randint(10, 30)
-    randDirection = random.randint(0, 3)
+    randFrame = random.randint(10, 15)
+    randDirection = random.randint(0, 5)
+
+
+    
+
+
+
+
+
 
 screenSize(1024,768)
 setAutoUpdate(False)

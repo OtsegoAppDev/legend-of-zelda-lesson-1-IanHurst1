@@ -99,7 +99,6 @@ class Background():
         pygame.display.update()
         self.surface = screen.copy()
 
-
 class newSprite(pygame.sprite.Sprite):
     def __init__(self, filename, framesX=1, framesY=1):
         pygame.sprite.Sprite.__init__(self)
@@ -166,26 +165,6 @@ class newSprite(pygame.sprite.Sprite):
 
 #PUT PLAYER CLASS HERE
 
-class Player(newSprite):
-    def __init__(self):
-        newSprite.__init__(self, "LinkSimple.png", 14)
-        self.rect.x = 500
-        self.rect.y = 350
-        self.speed = 4
-    
-    def move(self, frame):
-        if self.orientation == 0:
-            self.rect.y = self.rect.y + self.speed
-            self.changeImage(0*2 + frame)
-        elif self.orientation ==1:
-            self.rect.y = self.rect.y - self.speed
-            self.changeImage(1*2 + frame)
-        elif self.orientation ==2:
-            self.rect.x = self.rect.x + self.speed
-            self.changeImage(2*2 + frame)
-        else:
-            self.rect.x = self.rect.x - self.speed
-            self.changeImage(3*2 + frame)
 
 class newTextBox(pygame.sprite.Sprite):
     def __init__(self, text, xpos, ypos, width, case, maxLength, fontSize):

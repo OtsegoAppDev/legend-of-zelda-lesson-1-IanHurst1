@@ -60,7 +60,15 @@ class Player(newSprite):
                 print(self.hp)
             else:
                 self.hp = 0
+                
+                
+    def collectedHeart(self, Heart, link):
+        if self.rect.colliderect(Heart):
+            Heart.collecting(link)
             
+    def pickedUpHeart(self, heart):
+        if self.rect.colliderect(heart):
+            heart.pickUp(self)
             
     def hitTest(self, otherSprite):
         
@@ -88,7 +96,7 @@ class Sword(newSprite):
         newSprite.__init__(self, "WoodSword.png", 4, 2)
         self.player = player
         self.step = 0
-        self.damage = 1
+        self.damage = 10
     
     def swing(self):
         if self.player.orientation ==0:
@@ -133,6 +141,7 @@ class monster(newSprite):
         self.randFrame = random.randint(10, 15)
         self.randDirection = random.randint(0, 5)
     
+
     
     def hit(self, damage, link):
         self.hp = self.hp - damage
@@ -151,52 +160,63 @@ class monster(newSprite):
     
     def direction(self, frameCount):
         if frameCount == self.randFrame:
-            self.randNumbers()
-            if self.randDirection == 0:
-                self.up = True
-                self.down = False
-                self.left = False
-                gLight = False
-            elif self.randDirection == 1:
-                self.up = False
-                self.down = True
-                self.left = False
-                self.right = False
-            elif self.randDirection == 2:
-                self.up = False
-                self.down = False
-                self.left = True
-                self.right = False
-            elif self.randDirection == 3:
-                self.up = False
-                self.down = False
-                self.left = False
-                self.right = True
-            else:
-                self.up = False
-                self.down = False
-                self.left = False
-                self.right = False
-            if self.rect.x <= 10:
-                self.up = False
-                self.down = False
-                self.left = False
-                self.right = True
-            if self.rect.x >= 1004:
-                self.up = False
-                self.down = False
-                self.left = True
-                self.right = False
-            if self.rect.y <= 10:
-                self.up = False
-                self.down = True
-                self.left = False
-                self.right = False
-            if self.rect.y >= 748:
-                self.up = True
-                self.down = False
-                self.left = False
-                self.right = False
+            self.pickDirection()
+    
+    def noGoOut(self):
+        if self.rect.x >= 992:
+            self.up = False
+            self.down = False
+            self.left = True
+            self.right = False
+        if self.rect.x <= 1:
+            self.up = False
+            self.down = False
+            self.left = False
+            self.right = True
+        if self.rect.y <= 1:
+            self.up = False
+            self.down = True
+            self.left = False
+            self.right = False
+        if self.rect.y >= 736:
+            self.up = True
+            self.down = False
+            self.left = False
+            self.right = False
+                
+                
+    def pickDirection(self):
+        self.randNumbers()
+        if self.randDirection == 0:
+            self.up = True
+            self.down = False
+            self.left = False
+            gLight = False
+        elif self.randDirection == 1:
+            self.up = False
+            self.down = True
+            self.left = False
+            self.right = False
+        elif self.randDirection == 2:
+            self.up = False
+            self.down = False
+            self.left = True
+            self.right = False
+        elif self.randDirection == 3:
+            self.up = False
+            self.down = False
+            self.left = False
+            self.right = True
+        else:
+            self.up = False
+            self.down = False
+            self.left = False
+            self.right = False
+        if self.rect.x <= 10:
+            self.up = False
+            self.down = False
+            self.left = False
+            self.right = True
                 
         def move(self, frame):
             if self.up == True:
@@ -230,8 +250,8 @@ class monster(newSprite):
 class gororia(monster):
     def __init__(self):
         newSprite.__init__(self,"gororia.png", 4, 2)
-        self.rect.x = 400
-        self.rect.y = 400
+        self.rect.x = random.randint(100, 900)
+        self.rect.y = random.randint(100, 500)
         self.speed = 4
         self.hp = 4
         self.damage = 2
@@ -280,8 +300,8 @@ class octorok(monster):
     def __init__(self):
         newSprite.__init__(self, "Octorok.png", 4, 2)
  
-        self.rect.x = 200
-        self.rect.y = 200
+        self.rect.x = random.randint(100, 900)
+        self.rect.y = random.randint(100, 500)
         self.speed = 3
         self.hp = 2
         self.damage = 1
@@ -320,4 +340,96 @@ class octorok(monster):
             else:
                 self.frameNum = 7
         changeSpriteImage(self, self.frameNum)
+
+
+class heartContainer(newSprite):
+    def __init__(self):
+        newSprite.__init__(self, "Hearts.png", 3, 1)
+        self.rect.x = 500
+        self.rect.y = 300
+        self.collected = False
+        
+    def spawn(self):
+        changeSpriteImage(self, 2)
+        showSprite(self)
+        
+        
+    def collecting(self, link):
+        self.rect.x = 2000
+        self.rect.y = 2000
+        killSprite(self)
+        self.collected = True
+        if link.startHp < 10:
+            link.startHp = link.startHp + 1
+            link.hp = link.startHp
+        else:
+            link.hp = link.startHp
+        
+
+
+
+
+
+
+
+
+
+
+
+        
+class heart(newSprite):
+    def __init__(self):
+        newSprite.__init__(self, "Hearts.png", 3, 1)
+        
+        self.rect.x = 800
+        self.rect.y = 80
+        self.number = 0
+        self.distance = 17
+        
+    def removeHeart(self, link):
+        if link.hp <= self.number:
+            hideSprite(self)
+            
+    def addHeart(self, link):
+        if link.hp > self.number:
+            showSprite(self)
+    
+    def moveHeart(self):
+        self.rect.x = self.rect.x + (self.number * self.distance)
+        
+        
+class heartPickUp(newSprite):
+    def __init__(self):
+        newSprite.__init__(self, "Hearts.png", 3, 1)
+        self.rect.x = 400
+        self.rect.y = 400
+        self.heal = 1
+        self.collected = False
+        
+    def pickUp(self, link):
+        if link.hp < link.startHp:
+            link.hp = link.hp + self.heal
+            if link.hp > link.startHp:
+                link.hp = link.startHp
+        self.collected = True
+        self.rect.x = 2000
+        self.rect.y = 2000
+        killSprite(self)
+        
+    def Spawn(self, mon):
+        self.rect.x = mon.rect.x
+        self.rect.y = mon.rect.y
+        if random.randint(1 ,5) == 5:
+            self.heal = 2
+            changeSpriteImage(self, 1)
+        
+        
+        
+#class live(heart):
+ #   def __init__(self):
+  #      newSprite.__init__(self, "Hearts.png", 3, 1)
+        
+        
+        
+        
     

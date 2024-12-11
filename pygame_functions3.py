@@ -5,6 +5,10 @@
 
 
 import pygame, math, sys, os
+import random
+from os import path
+import base64
+#from gameClasses import octorok, Player
 
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
@@ -57,6 +61,149 @@ keydict = {"space": pygame.K_SPACE, "esc": pygame.K_ESCAPE, "up": pygame.K_UP, "
            "0": pygame.K_0}
 screen = ""
 
+base64dict = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9, "K":10, "L":11, "M":12, "N":13, "O":14, "P":15,
+              "Q":16, "R":17, "S":18, "T":19, "U":20, "V":21, "W":22, "X":23, "Y":24, "Z":25, "a":26, "b":27, "c":28, "d":29, "e":30,
+              "f":31, "g":32, "h":33, "i":34, "j":35, "k":36, "l":37, "m":38, "n":39, "o":40, "p":41, "q":42, "r":43, "s":44, "t":45, "u":46,
+              "v":47, "w":48, "x":49, "y":50, "z":51, "0":52, "1":53, "2":54, "3":55, "4":56, "5":57, "6":58, "7":59, "8":60, "9":61, "+":62, "/":63}
+
+class Background():
+    """
+    The Background class creates a background that does not interact with the sprites.  It can scroll.
+    """
+    global screen
+    def __init__(self):
+        self.colour = pygame.Color("black")
+
+    def setTiles(self, tiles):
+        if type(tiles) is str:
+            self.tiles = [[loadImage(tiles)]]
+        elif type(tiles[0]) is str:
+            self.tiles = [[loadImage(i) for i in tiles]]
+        else:
+            self.tiles = [[loadImage(i) for i in row] for row in tiles]
+        self.stagePosX = 0
+        self.stagePosY = 0
+        self.tileWidth = self.tiles[0][0].get_width()
+        self.tileHeight = self.tiles[0][0].get_height()
+        screen.blit(self.tiles[0][0], [0, 0])
+        self.surface = screen.copy()
+
+    def scroll(self, x, y):
+        self.stagePosX -= x
+        self.stagePosY -= y
+        col = (self.stagePosX % (self.tileWidth * len(self.tiles[0]))) // self.tileWidth
+        xOff = (0 - self.stagePosX % self.tileWidth)
+        row = (self.stagePosY % (self.tileHeight * len(self.tiles))) // self.tileHeight
+        yOff = (0 - self.stagePosY % self.tileHeight)
+
+        col2 = ((self.stagePosX + self.tileWidth) % (self.tileWidth * len(self.tiles[0]))) // self.tileWidth
+        row2 = ((self.stagePosY + self.tileHeight) % (self.tileHeight * len(self.tiles))) // self.tileHeight
+        screen.blit(self.tiles[row][col], [xOff, yOff])
+        screen.blit(self.tiles[row][col2], [xOff + self.tileWidth, yOff])
+        screen.blit(self.tiles[row2][col], [xOff, yOff + self.tileHeight])
+        screen.blit(self.tiles[row2][col2], [xOff + self.tileWidth, yOff + self.tileHeight])
+
+        self.surface = screen.copy()
+
+    def setColour(self, colour):
+        self.colour = parseColour(colour)
+        screen.fill(self.colour)
+        pygame.display.update()
+        self.surface = screen.copy()
+'''
+class Scene:
+    """
+    A Scene is a background that does interact with the sprites.  For instance
+    there are walls that the sprites cannot pass through
+    """
+    def __init__(self, player, spriteSheetFileName, mapFileName, framesX=1, framesY=1):
+        self.player = player
+        spriteSheet = loadImage(spriteSheetFileName)
+        self.originalWidth = spriteSheet.get_width() // framesX
+        self.originalHeight = spriteSheet.get_height() // framesY
+        frameSurf = pygame.Surface((self.originalWidth, self.originalHeight), pygame.SRCALPHA, 32)
+        x = 0
+        y = 0
+        self.images = []
+        for column in range(framesY):
+            for frameNo in range(framesX):
+                frameSurf = pygame.Surface((self.originalWidth, self.originalHeight), pygame.SRCALPHA, 32)
+                frameSurf.blit(spriteSheet, (x, y))
+                self.images.append(frameSurf.copy())
+                x -= self.originalWidth
+            y -=self.originalHeight
+            x = 0
+        #Other initialized parameters
+        self.Wall_Tiles = []
+        self.Ground_Tiles = []
+        self.Enemies = []
+        self.Projectiles = []
+        self.Items=[]
+        #Populate the lists
+        game_folder = os.getcwd()
+        map_data = []
+        with open(path.join(game_folder, mapFileName), 'rt') as f:
+            for line in f:
+                map_data.append(line)
+                
+        i = 0
+        for row, tiles in enumerate(map_data):
+                for col, tile in enumerate(tiles):
+                    if tile in base64dict:
+                        thisWall = Wall(self.images[base64dict[tile]])
+                        thisWall.move(col*32, row*32)
+                        self.Wall_Tiles.append(thisWall)    
+                    elif tile == "@":
+                        enemy = octorok()
+                        enemy.rect.x=col*32
+                        enemy.rect.y=row*32
+                        self.Enemies.append(enemy)
+                    if tile not in base64dict:
+                        thisGround = Wall(self.images[2])
+                        thisGround.move(col*32, row*32)
+                        self.Ground_Tiles.append(thisGround)
+        self.surface=screen.copy()
+        background=self.surface
+        #Methods for Scrolling the Scene
+    def scroll(self, x, y):
+        for enemy in self.Enemies:
+            enemy.speed = 0
+            hideSprite(enemy)
+        for projectile in self.Projectiles:
+            killSprite(projectile)
+        self.Projectiles = []
+        for item in self.Items:
+            killSprite(item)
+        self.Items = []
+        for tile in self.all_wall_panels:
+            tile.move(tile.rect.x+x, tile.rect.y+y)
+        for tile in self.all_ground_tiles:
+            tile.move(tile.rect.x+x, tile.rect.y+y)
+
+
+
+class Wall(pygame.sprite.Sprite):
+    """
+    Walls are Scene Objects that most sprites cannot pass through
+    """
+    def __init__(self, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0,0)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.angle = 9
+        self.scale = 1
+        self.x = self.rect.x
+        self.y = self.rect.y
+    def move(self, xpos, ypos, centre=False):
+        if centre:
+            self.rect.center = [xpos, ypos]
+        else:
+            self.rect.topleft = [xpos, ypos]
+
+
+
 
 class Background():
     def __init__(self):
@@ -98,7 +245,7 @@ class Background():
         screen.fill(self.colour)
         pygame.display.update()
         self.surface = screen.copy()
-
+'''
 class newSprite(pygame.sprite.Sprite):
     def __init__(self, filename, framesX=1, framesY=1):
         pygame.sprite.Sprite.__init__(self)
@@ -753,6 +900,12 @@ def setIcon(iconfile):
 def setWindowTitle(string):
     pygame.display.set_caption(string)
 
+def showBackground(background):
+    for sprite in background.Wall_Tiles:
+        showSprite(sprite)
+    
+    for sprite in background.Ground_Tiles:
+        showSprite(sprite)
 
 if __name__ == "__main__":
     print(""""pygame_functions is not designed to be run directly.

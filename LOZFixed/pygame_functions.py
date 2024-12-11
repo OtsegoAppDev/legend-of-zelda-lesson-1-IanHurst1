@@ -5,6 +5,9 @@
 
 
 import pygame, math, sys, os
+import random
+from os import path
+import base64
 
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
@@ -16,6 +19,11 @@ musicPaused = False
 hiddenSprites = pygame.sprite.OrderedUpdates()
 screenRefresh = True
 background = None
+
+base64dict = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9, "K":10, "L":11, "M":12, "N":13, "O":14, "P":15,
+              "Q":16, "R":17, "S":18, "T":19, "U":20, "V":21, "W":22, "X":23, "Y":24, "Z":25, "a":26, "b":27, "c":28, "d":29, "e":30,
+              "f":31, "g":32, "h":33, "i":34, "j":35, "k":36, "l":37, "m":38, "n":39, "o":40, "p":41, "q":42, "r":43, "s":44, "t":45, "u":46,
+              "v":47, "w":48, "x":49, "y":50, "z":51, "0":52, "1":53, "2":54, "3":55, "4":56, "5":57, "6":58, "7":59, "8":60, "9":61, "+":62, "/":63}
 
 keydict = {"space": pygame.K_SPACE, "esc": pygame.K_ESCAPE, "up": pygame.K_UP, "down": pygame.K_DOWN,
            "left": pygame.K_LEFT, "right": pygame.K_RIGHT, "return": pygame.K_RETURN,
@@ -99,7 +107,6 @@ class Background():
         pygame.display.update()
         self.surface = screen.copy()
 
-
 class newSprite(pygame.sprite.Sprite):
     def __init__(self, filename, framesX=1, framesY=1):
         pygame.sprite.Sprite.__init__(self)
@@ -163,6 +170,7 @@ class newSprite(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         if screenRefresh:
             updateDisplay()
+
 class newTextBox(pygame.sprite.Sprite):
     def __init__(self, text, xpos, ypos, width, case, maxLength, fontSize):
         pygame.sprite.Sprite.__init__(self)
@@ -291,6 +299,7 @@ class newLabel(pygame.sprite.Sprite):
 
 def loadImage(fileName, useColorKey=False):
     if os.path.isfile(fileName):
+        
         image = pygame.image.load(fileName)
         image = image.convert_alpha()
         # Return the image
@@ -396,13 +405,13 @@ def showSprite(sprite):
         updateDisplay()
 
 
-def makeSprite(filename, framesX=1, framesY=1 ):
-    thisSprite = newSprite(filename, framesX, framesY)
+def makeSprite(filename, frames=1):
+    thisSprite = newSprite(filename, frames)
     return thisSprite
 
 
-def addSpriteImage(sprite, image):
-    sprite.addImage(image)
+def addSpriteImage(sprite, image, frames=1):
+    sprite.addImage(image, frames)
 
 
 def changeSpriteImage(sprite, index):
@@ -750,6 +759,32 @@ def setIcon(iconfile):
 def setWindowTitle(string):
     pygame.display.set_caption(string)
 
+def showBackground(background):
+    """
+    Shows background sprites
+    """
+    for sprite in background.Wall_Tiles:
+        showSprite(sprite)
+    
+    for sprite in background.Water_Tiles:
+        showSprite(sprite)
+        
+    for sprite in background.Ground_Tiles:
+        showSprite(sprite)
+        
+    for sprite in background.Enemies:
+        showSprite(sprite)
+        
+    for sprite in background.Items:
+        showSprite(sprite)
+def hideBackground(background):
+    for sprite in background.Wall_Tiles:
+        hideSprite(sprite)
+        
+    for sprite in background.Ground_Tiles:
+        hideSprite(sprite)
+    for sprite in background.Enemies:
+        hideSprite(sprite)
 
 if __name__ == "__main__":
     print(""""pygame_functions is not designed to be run directly.
